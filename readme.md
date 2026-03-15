@@ -35,10 +35,17 @@ python scripts/scrape.py haverford jocelyn-leal --year 2025 -d
 
 ## Setup
 
+After running:
+
+
+`git clone https://github.com/destingollamudi/ncaa-softball.git` 
+
+to clone the repo locally on your machine run:
+
 ```
 python3 -m venv venv
 source venv/bin/activate
-pip install requests beautifulsoup4 pandas
+pip install -r requirements.txt
 ```
 
 ## Adding a New School
@@ -64,6 +71,43 @@ Date, Opponent, W/L, AB, R, H, RBI, 2B, 3B, HR, BB, IBB, SB, SBA, CS, HBP, SH, S
 
 ### Fielding
 Date, Opponent, W/L, C, PO, A, E, FLD%, DP, SBA, CSB, PB, CI
+
+## Statistical Analysis
+
+A variety of statistical modeling methods will be applied to uncover 
+performance trends, predictive patterns, and behavioral archetypes 
+from game-level data.
+
+### Supervised Learning
+Used when the outcome we are measuring is known. Applied here for 
+career trajectory analysis and game performance prediction.
+
+**Regression**
+- Linear Regression: measures whether improvement across seasons 
+  represents a genuine upward trend
+- Natural Cubic Splines: captures curves and bends in her development 
+  arc rather than forcing a straight line
+- Multiple Regression: identifies which stats most strongly drive 
+  per game OPS
+
+**Classification**
+- Logistic Regression: predicts whether next game performance will 
+  be above or below season average
+- Linear Discriminant Analysis (LDA): identifies which combination 
+  of stats best separates strong, average, and poor game performances
+
+### Unsupervised Learning
+Used when we let the data reveal its own structure without 
+predefined labels.
+
+**Clustering**
+- K-Means Clustering: groups games by multi-stat similarity to 
+  discover distinct performance archetypes
+
+**Association**
+- Rolling window autocorrelation: detects whether performance in 
+  one game genuinely predicts the next, separating real hot streaks 
+  from random variation
 
 ## Roadmap
 
