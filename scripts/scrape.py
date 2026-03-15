@@ -54,20 +54,21 @@ else:
 
 # now we have endpoint that grabs data. Career data is a nice clean json 
 # however for specific year it returns html table. further cleaning is required but now we can save json
-
+headers = {
+"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+"Referer": player_url
+}
+data = requests.get(base_endpoint, headers=headers)
+data_json = data.json()
 if (download):
-    headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Referer": player_url
-    }
-    print(base_endpoint)
-    data = requests.get(base_endpoint, headers=headers)
-    print(data)
     if (year):
         filename = f"{player}_{school}_{year}.json"
     else:
         filename = f"{player}_{school}.json"
     filepath = os.path.join("../","data", "raw", filename)
-    data_json = data.json()
+    
     with open(filepath, "w") as f:
         json.dump(data_json, f)
+else:
+    # so we can pipe to clean.py if we want
+    print(json.dumps(data_json))
