@@ -18,20 +18,39 @@ ncaa-softball/
 
 ## Usage
 
-### Scrape a specific player and year
+### Scrape and clean in one step (pipe)
 ```
-python scripts/scrape.py haverford jocelyn-leal --year 2025
-```
-
-### Scrape a player's full career
-```
-python scripts/scrape.py haverford jocelyn-leal
+python scripts/scrape.py haverford jocelyn-leal --year 2025 | python scripts/clean.py
 ```
 
-### Scrape and save raw JSON to data/raw
+### Scrape multiple years and clean
+```
+python scripts/scrape.py haverford jocelyn-leal --year 2024 2025 | python scripts/clean.py
+```
+
+### Scrape a player's full career and clean
+```
+python scripts/scrape.py haverford jocelyn-leal | python scripts/clean.py
+```
+
+### Save raw JSON to data/raw (for later cleaning)
 ```
 python scripts/scrape.py haverford jocelyn-leal --year 2025 -d
 ```
+
+### Clean previously saved raw files
+```
+# Single player, single year
+python scripts/clean.py haverford jocelyn-leal -y 2025
+
+# Single player, career
+python scripts/clean.py haverford jocelyn-leal
+
+# All saved files for a school
+python scripts/clean.py haverford
+```
+
+Output CSVs are written to `data/csv/` as `<school>_<player>_<year>_hitting.csv` and `_fielding.csv`.
 
 ## Setup
 
