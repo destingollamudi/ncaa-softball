@@ -67,48 +67,69 @@ All statistics are sourced from publicly accessible college athletics pages powe
 ## Stats Collected
 
 ### Hitting
-Date, Opponent, W/L, AB, R, H, RBI, 2B, 3B, HR, BB, IBB, SB, SBA, CS, HBP, SH, SF, GDP, K, AVG
+Date, Opponent, W/L, GS, AB, R, H, RBI, 2B, 3B, HR, BB, IBB, SB, SBA, CS, HBP, SH, SF, GDP, K, home_away
+
+*Derived per game: OPS (OBP + SLG), OBP, SLG, TB*
 
 ### Fielding
 Date, Opponent, W/L, C, PO, A, E, FLD%, DP, SBA, CSB, PB, CI
 
 ## Statistical Analysis
 
-A variety of statistical modeling methods will be applied to uncover 
-performance trends, predictive patterns, and behavioral archetypes 
+A variety of statistical modeling methods will be applied to uncover
+performance trends, predictive patterns, and behavioral archetypes
 from game-level data.
 
+**Data available:** A typical four-year D3 softball starter accumulates
+roughly 120-160 game-level hitting rows across four seasons, assuming
+a ~40-game schedule per year. Season-level aggregates are available
+for each completed season but are used for descriptive context only,
+not as independent observations. Any in-progress current season is
+treated as a snapshot and excluded from cross-season models.
+
 ### Supervised Learning
-Used when the outcome we are measuring is known. Applied here for 
+Used when the outcome we are measuring is known. Applied here for
 career trajectory analysis and game performance prediction.
 
 **Regression**
-- Linear Regression: measures whether improvement across seasons 
-  represents a genuine upward trend
-- Natural Cubic Splines: captures curves and bends in her development 
-  arc rather than forcing a straight line
-- Multiple Regression: identifies which stats most strongly drive 
-  per game OPS
+- Linear Regression: measures whether improvement across seasons
+  represents a genuine upward trend in AVG, OBP, and SLG.
+  Interpretable descriptively across four seasons; p-values treated
+  with caution given the small number of season-level points.
+- Natural Cubic Splines: applied to the within-season game-level
+  time series (e.g. rolling AVG across 37 games of 2023) to capture
+  curves and bends in her development arc rather than forcing a
+  straight line. Not applied at the season level due to insufficient
+  data points.
+- Multiple Regression: identifies which per-game stats (BB, H, 2B,
+  home_away, AB) most strongly drive per-game OPS. Uses all available
+  game-level rows; capped at 4-5 predictors to avoid overfitting
+  on 80 observations.
 
 **Classification**
-- Logistic Regression: predicts whether next game performance will 
-  be above or below season average
-- Linear Discriminant Analysis (LDA): identifies which combination 
-  of stats best separates strong, average, and poor game performances
+- Logistic Regression: predicts whether a given game's OPS will
+  fall above or below that season's average. Binary outcome derived
+  from H, BB, AB, and extra-base hit columns.
+- Linear Discriminant Analysis (LDA): identifies which combination
+  of per-game stats best separates above-average and below-average
+  performances. Two-class formulation preferred over three-class
+  given sample size.
 
 ### Unsupervised Learning
-Used when we let the data reveal its own structure without 
+Used when we let the data reveal its own structure without
 predefined labels.
 
 **Clustering**
-- K-Means Clustering: groups games by multi-stat similarity to 
-  discover distinct performance archetypes
+- K-Means Clustering: groups individual games by multi-stat
+  similarity (H, BB, R, 2B, SB) to discover distinct performance
+  archetypes. Tested at k=3 and k=4 on the full 80-game pool.
 
 **Association**
-- Rolling window autocorrelation: detects whether performance in 
-  one game genuinely predicts the next, separating real hot streaks 
-  from random variation
-
+- Rolling window autocorrelation: detects whether OPS or AVG in
+  one game genuinely predicts the next, separating real hot streaks
+  from random variation. Applied within each season separately;
+  wide confidence intervals are expected and are themselves a
+  meaningful result.
 ## Roadmap
 
 - Streamlit web app for player-facing stat dashboards

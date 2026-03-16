@@ -48,7 +48,44 @@ def careerClean(data):
     return cleaned
 
 def yearClean(data):
-    pass
+    html = data["current_stats"]
+    soup = BeautifulSoup(html, "html.parser")
+    cleaned = {}
+
+    for table in soup.find_all("table"):
+        caption = table.find("caption").get_text(strip=True).lower()
+        headers = [th.get_text(strip=True) for th in table.find("thead").find_all("th")]
+
+        # drop cumulative AVG column from hitting
+        drop_cols = {"AVG"}
+        keep_idx = [i for i, h in enumerate(headers) if h not in drop_cols]
+        headers = [headers[i] for i in keep_idx]
+
+        rows = []
+        for tr in table.find("tbody").find_all("tr"):
+            cells = [td.get_text(strip=True) for td in tr.find_all("td")]
+            cells = [cells[i] for i in keep_idx]
+            row = dict(zip(headers, cells))
+
+            # clean opponent - "vsDrew" -> "Drew", also capture home/away
+            raw_opp = row.get("Opponent", "")
+            if raw_opp.startswith("vs"):
+                row["home_away"] = "home"
+                row["Opponent"] = raw_opp[2:].strip()
+            elif raw_opp.startswith("at"):
+                row["home_away"] = "away"
+                row["Opponent"] = raw_opp[2:].strip()
+            else:
+                row["home_away"] = "home"
+
+            rows.append(row)
+
+        if "hitting" in caption:
+            cleaned["hitting"] = rows
+        elif "fielding" in caption:
+            cleaned["fielding"] = rows
+
+    return cleaned
 
 def to_csv(cleaned, clean_filepath, dtype):
     os.makedirs(CSV_DIR, exist_ok=True)
