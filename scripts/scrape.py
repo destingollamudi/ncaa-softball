@@ -62,9 +62,9 @@ data = requests.get(base_endpoint, headers=headers)
 data_json = data.json()
 if (download):
     if (year):
-        filename = f"{player}_{school}_{year}.json"
+        filename = f"{player}_{school}_{year}_raw.json"
     else:
-        filename = f"{player}_{school}.json"
+        filename = f"{player}_{school}_raw.json"
     filepath = os.path.join("../","data", "raw", filename)
     
     with open(filepath, "w") as f:

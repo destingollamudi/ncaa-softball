@@ -5,6 +5,7 @@ import json
 from bs4 import BeautifulSoup
 
 RAW_DIR = os.path.join("..", "data", "raw")
+CLEAN_DIR = os.path.join("..", "data", "clean")
 
 def get_files(school, player, year):
     files = os.listdir(RAW_DIR)
@@ -14,7 +15,7 @@ def get_files(school, player, year):
     elif year:
         matches = [f for f in files if f.startswith(f"{player}_{school}_{year}")]
     else:
-        matches = [f for f in files if f.startswith(f"{player}_{school}")]
+        matches = [f for f in files if f in (f"{player}_{school}_raw.json", f"{player}_{school}.json")]
     return [os.path.join(RAW_DIR, f) for f in matches]
 
 def detect_type(data):
@@ -29,8 +30,19 @@ def clean(data):
         return careerClean(data)
     return yearClean(data)
 
+def get_clean_path(raw_filepath):
+    filename = os.path.basename(raw_filepath)
+    clean_filename = filename.replace("_raw", "")
+    return os.path.join(CLEAN_DIR, clean_filename)
+
 def careerClean(data):
-    pass
+    cleaned = {}
+    for year in data:
+        year_data = data[year]
+        cleaned[year] = {k: v for k, v in year_data.items() if k != "season_stats"}
+        cleaned[year]["hitting"] = year_data["season_stats"]["hitting_stats"]
+        cleaned[year]["fielding"] = year_data["season_stats"]["fielding_stats"]
+    return cleaned
 
 def yearClean(data):
     pass
@@ -59,4 +71,8 @@ else:
         with open(filepath) as f:
             data = json.load(f)
         print(f"Cleaning {filepath}...", file=sys.stderr)
-        clean(data)
+        cleaned = clean(data)
+        clean_filepath = get_clean_path(filepath)
+        print(f"Dumping {clean_filepath}...", file=sys.stderr)
+        with open(clean_filepath, "w") as f:
+            json.dump(cleaned, f, indent=2)
