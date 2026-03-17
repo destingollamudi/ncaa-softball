@@ -6,10 +6,15 @@ from pathlib import Path
 import data_loader as d
 import patsy
 
-OUTPUT_DIR = Path(__file__).parent / "outputs"
-OUTPUT_DIR.mkdir(exist_ok=True)
+def get_output_dir(df: pd.DataFrame) -> Path:
+    player = df["player"].iloc[0]
+    school = df["school"].iloc[0]
+    output_dir = Path(__file__).parent / "outputs" / school.lower() / player.lower().replace(" ", "-")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
 
 def linear_regression_season_trend(df: pd.DataFrame):
+    output_dir = get_output_dir(df)
     season_df = df.groupby("season")[["H","AB","BB","HBP","SF","TB"]].sum()
     season_df["SLG"] = (season_df["TB"] / season_df["AB"]).round(3)
     season_df["OBP"] = ((season_df["H"] + season_df["BB"] + season_df["HBP"]) / (season_df["AB"] + season_df["BB"] + season_df["HBP"] + season_df["SF"])).round(3)
@@ -26,14 +31,14 @@ def linear_regression_season_trend(df: pd.DataFrame):
     plt.xlabel("Season")
     plt.ylabel("OPS")
     plt.title("OPS Trend by Season")
-    plt.savefig(OUTPUT_DIR / "ops_season_trend.png")
+    plt.savefig(output_dir / "ops_season_trend.png")
     plt.close()
     print("Plot saved to /outputs")
 
     return model
 
 def multiple_regression_game_trends(df: pd.DataFrame):
-    df["home_flag"] = (df["home_away"] == "home").astype(int)
+    output_dir = get_output_dir(df)
     X = sm.add_constant(df[["BB", "2B"]])
     y = df["OPS"]
     model = sm.OLS(y, X).fit()
@@ -48,13 +53,14 @@ def multiple_regression_game_trends(df: pd.DataFrame):
     plt.xlabel("Coefficient (effect on OPS)")
     plt.title("Multiple Regression: Predictors of Per-Game OPS")
     plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / "ops_mlr_coefficients.png")
+    plt.savefig(output_dir / "ops_mlr_coefficients.png")
     plt.close()
     print("Plot saved to outputs/ops_mlr_coefficients.png")
 
     return model
 
 def spline_season_arc(df: pd.DataFrame, season: int):
+    output_dir = get_output_dir(df)
     df = df[df["season"] == season]
     X = df["game_number"]
     y = df["OPS"]
@@ -73,11 +79,12 @@ def spline_season_arc(df: pd.DataFrame, season: int):
     plt.title(f"{season} Season OPS Arc")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / f"spline_{season}.png")
+    plt.savefig(output_dir / f"spline_{season}.png")
     plt.close()
     print(f"Plot saved to outputs/spline_{season}.png")
 
 def spline_overlay(df: pd.DataFrame):
+    output_dir = get_output_dir(df)
     plt.figure(figsize=(12, 6))
     
     for season in [2023, 2024, 2025, 2026]:
@@ -96,11 +103,12 @@ def spline_overlay(df: pd.DataFrame):
     plt.title("Season OPS Arc Overlay")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / "spline_overlay.png")
+    plt.savefig(output_dir / "spline_overlay.png")
     plt.close()
     print("Plot saved to /outputs")
 
 def spline_all(df: pd.DataFrame):
+    output_dir = get_output_dir(df)
     X = df["career_game_number"]
     y = df["OPS"]
     spline_basis = patsy.cr(X, df=4)
@@ -118,12 +126,13 @@ def spline_all(df: pd.DataFrame):
     plt.title(f"Career OPS Arc")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / f"spline_career.png")
+    plt.savefig(output_dir / f"spline_career.png")
     plt.close()
     print(f"Plot saved to /outputs")
  
 if __name__ == "__main__":
-    df = d.load_hitting_data()
+    df = d.load_hitting_data(player="jayme-prandine")
+    multiple_regression_game_trends(df)
     for season in [2023, 2024, 2025, 2026]:
         spline_season_arc(df.copy(), season)
     spline_overlay(df.copy())
