@@ -1,6 +1,6 @@
 # NCAA Softball Analytics
 
-A Python-based data collection and analysis tool for NCAA DIII softball player statistics. Built to scrape game-by-game hitting and fielding data from Sidearm Sports powered college athletics sites, enabling career trajectory analysis and performance research.
+A Python-based data collection and analysis tool for NCAA softball player statistics. Built to scrape game-by-game hitting and fielding data from Sidearm Sports powered college athletics sites, enabling career trajectory analysis and performance research.
 
 ## Project Structure
 
