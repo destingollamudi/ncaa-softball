@@ -31,6 +31,10 @@ def load_hitting_data() -> pd.DataFrame:
         (combined["AB"] + combined["BB"] + combined["HBP"] + combined["SF"])
     )
     combined["OPS"] = combined["OBP"] + combined["SLG"]
+    combined = combined.sort_values(["season", "Date"])
+    combined["game_number"] = combined.groupby("season").cumcount() + 1
+    combined = combined.sort_values(["season", "game_number"])
+    combined["career_game_number"] = range(1, len(combined) + 1)
 
     return combined
 
